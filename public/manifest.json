@@ -1,6 +1,6 @@
 {
-  "short_name": "DRDO CWA",
-  "name": "DRDO CWA Dashboard",
+  "short_name": "CWA",
+  "name": "CWA Dashboard",
   "icons": [
     {
       "src": "favicon.ico",

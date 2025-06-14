@@ -26,7 +26,7 @@ export default function Index() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white">
-              DRDO CWA Dashboard
+              Medical Management of CWA
             </h1>
             <p className="text-drdo-gray-light mt-1">
               Chemical Warfare Agent Detection & Treatment System

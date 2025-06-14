@@ -63,8 +63,8 @@ export function DashboardLayout({ children }) {
               <Shield className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-white">DRDO CWA</h1>
-              <p className="text-sm text-drdo-gray-light">Medical Dashboard</p>
+              <h1 className="text-lg font-semibold text-white">CWA</h1>
+              <p className="text-sm text-drdo-gray-light">Medical Management</p>
             </div>
           </div>
         </SidebarHeader>
