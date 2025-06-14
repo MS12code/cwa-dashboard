@@ -20,7 +20,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/symptom-diagnosis" element={<SymptomDiagnosis />} />
+          <Route path="/diagnosis" element={<SymptomDiagnosis />} />
+          <Route path="/symptoms" element={<SymptomDiagnosis />} />
           <Route path="/cwa-lookup" element={<CWALookup />} />
           <Route path="/treatment-guide" element={<TreatmentGuide />} />
           <Route path="/medical-report" element={<MedicalReport />} />

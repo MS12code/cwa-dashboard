@@ -30,8 +30,13 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
-    title: "Symptom Diagnosis",
-    url: "/symptom-diagnosis",
+    title: "Symptoms",
+    url: "/symptoms",
+    icon: Stethoscope,
+  },
+  {
+    title: "Diagnosis",
+    url: "/diagnosis",
     icon: Stethoscope,
   },
   {
@@ -78,7 +83,7 @@ export function DashboardLayout({ children }) {
                     <SidebarMenuButton
                       asChild
                       isActive={location.pathname === item.url}
-                      className="data-[active=true]:bg-drdo-primary data-[active=true]:text-white hover:bg-drdo-primary/10 hover:text-drdo-primary text-drdo-gray-light"
+                      className="data-[active=true]:bg-drdo-primary data-[active=true]:text-white hover:bg-drdo-primary/10 hover:text-drdo-primary"
                     >
                       <Link to={item.url}>
                         <item.icon className="h-4 w-4" />

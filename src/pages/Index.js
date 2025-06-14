@@ -39,7 +39,7 @@ export default function Index() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           <DashboardCard
             title="Total CWA Agents"
             value="5"
@@ -47,11 +47,11 @@ export default function Index() {
             trend="up"
             trendValue="+2 this month"
           />
-          <DashboardCard
+          {/* <DashboardCard
             title="Cases Today"
             value="0"
             icon={<Users className="h-6 w-6 text-blue-400" />}
-          />
+          /> */}
           <DashboardCard
             title="Response Time"
             value="< 2 min"
