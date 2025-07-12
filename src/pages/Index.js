@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "../components/dashboard-layout";
 import { DashboardCard } from "../components/dashboard-card";
 import {
@@ -15,10 +16,45 @@ import {
   Stethoscope,
   Search,
   BookOpen,
-  Zap,
+  ArrowRight,
 } from "lucide-react";
 
+const recentCases = [
+  {
+    id: 1,
+    symptoms: ["Headache", "Blurred Vision"],
+    reportedAt: "2:15 PM",
+  },
+  {
+    id: 2,
+    symptoms: ["Shortness of Breath", "Drooling"],
+    reportedAt: "11:32 AM",
+  },
+  {
+    id: 3,
+    symptoms: ["Nausea", "Skin Irritation"],
+    reportedAt: "9:18 AM",
+  },
+];
+
+const cwaAgents = [
+  {
+    name: "VX Nerve Agent",
+    category: "Chemical",
+  },
+  {
+    name: "Sarin (GB)",
+    category: "Chemical",
+  },
+  {
+    name: "Mustard Gas",
+    category: "Chemical",
+  },
+];
+
 export default function Index() {
+  const navigate = useNavigate();
+
   return (
     <DashboardLayout>
       <div className="p-8 space-y-8">
@@ -42,16 +78,11 @@ export default function Index() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           <DashboardCard
             title="Total CWA Agents"
-            value="5"
+            value={cwaAgents.length.toString()}
             icon={<TestTube className="h-6 w-6 text-drdo-primary" />}
             trend="up"
             trendValue="+2 this month"
           />
-          {/* <DashboardCard
-            title="Cases Today"
-            value="0"
-            icon={<Users className="h-6 w-6 text-blue-400" />}
-          /> */}
           <DashboardCard
             title="Response Time"
             value="< 2 min"
@@ -73,13 +104,46 @@ export default function Index() {
                 Recent Cases
               </CardTitle>
             </CardHeader>
-            <CardContent className="pb-6">
-              <div className="flex items-center justify-center h-32 text-drdo-gray-light">
-                <div className="text-center">
+            <CardContent className="pb-4 space-y-4 text-drdo-gray-light">
+              {recentCases.length === 0 ? (
+                <div className="text-center py-6">
                   <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p>No cases recorded today</p>
                 </div>
-              </div>
+              ) : (
+                recentCases.map((caseItem) => (
+                  <div
+                    key={caseItem.id}
+                    className="flex justify-between items-center border-b border-drdo-blue-light/20 pb-2"
+                  >
+                    <div>
+                      <p className="text-white font-medium">
+                        Case #{caseItem.id}
+                      </p>
+                      <p className="text-sm">
+                        Symptoms: {caseItem.symptoms.join(", ")}
+                      </p>
+                      <p className="text-xs mt-1 text-drdo-gray-light">
+                        Reported at: {caseItem.reportedAt}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      className="text-drdo-primary hover:text-white"
+                      onClick={() =>
+                        navigate(
+                          `/diagnosis?symptoms=${encodeURIComponent(
+                            caseItem.symptoms.join(",")
+                          )}`
+                        )
+                      }
+                    >
+                      View
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </div>
+                ))
+              )}
             </CardContent>
           </Card>
 
@@ -94,6 +158,7 @@ export default function Index() {
               <Button
                 className="w-full justify-start bg-drdo-primary hover:bg-drdo-secondary text-white h-12"
                 size="lg"
+                onClick={() => navigate("/symptoms")}
               >
                 <Stethoscope className="h-5 w-5 mr-3" />
                 Start Symptom Diagnosis
@@ -102,68 +167,35 @@ export default function Index() {
                 variant="outline"
                 className="w-full justify-start border-drdo-blue-light bg-drdo-blue/20 hover:bg-drdo-blue/40 text-white h-12"
                 size="lg"
+                onClick={() => navigate("/cwa-lookup")}
               >
                 <Search className="h-5 w-5 mr-3" />
                 Browse CWA Database
               </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start border-drdo-blue-light bg-drdo-blue/20 hover:bg-drdo-blue/40 text-white h-12"
-                size="lg"
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Agent Listing */}
+        <Card className="bg-drdo-blue/20 border-drdo-blue-light/50 backdrop-blur-sm">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold text-white">
+              Registered Chemical Agents
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-drdo-gray-light">
+            {cwaAgents.map((agent, idx) => (
+              <div
+                key={idx}
+                className="bg-white/5 p-4 rounded-lg border border-drdo-blue-light"
               >
-                <BookOpen className="h-5 w-5 mr-3" />
-                Treatment Guidelines
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* System Information */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="bg-drdo-blue/20 border-drdo-blue-light/50 backdrop-blur-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                  <Activity className="h-5 w-5 text-blue-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-drdo-gray-light">
-                    Database Status
-                  </p>
-                  <p className="font-semibold text-white">Connected</p>
-                </div>
+                <p className="text-white font-medium">{agent.name}</p>
+                <p className="text-xs">Category: {agent.category}</p>
               </div>
-            </CardContent>
-          </Card>
+            ))}
+          </CardContent>
+        </Card>
 
-          <Card className="bg-drdo-blue/20 border-drdo-blue-light/50 backdrop-blur-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-green-500/20 rounded-lg flex items-center justify-center">
-                  <Zap className="h-5 w-5 text-green-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-drdo-gray-light">Last Updated</p>
-                  <p className="font-semibold text-white">2:57 PM</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-drdo-blue/20 border-drdo-blue-light/50 backdrop-blur-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                  <Users className="h-5 w-5 text-purple-400" />
-                </div>
-                <div>
-                  <p className="text-sm text-drdo-gray-light">Active Users</p>
-                  <p className="font-semibold text-white">3</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </DashboardLayout>
   );

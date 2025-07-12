@@ -22,6 +22,7 @@ import {
   Shield,
 } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
+import { useNavigate } from "react-router-dom"; // at the top of DashboardLayout component
 
 const menuItems = [
   {
@@ -58,6 +59,7 @@ const menuItems = [
 
 export function DashboardLayout({ children }) {
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -108,7 +110,7 @@ export function DashboardLayout({ children }) {
             </AlertDescription>
           </Alert>
           <div className="mt-2">
-            <button className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+            <button className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors" onClick={() => navigate("/emergency-protocol")}>
               Emergency Protocol
             </button>
           </div>

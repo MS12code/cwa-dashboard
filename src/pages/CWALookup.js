@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "../components/dashboard-layout";
 import {
   Card,
@@ -7,37 +9,107 @@ import {
 } from "../components/ui/card";
 import { Search } from "lucide-react";
 
+const cwaAgents = [
+  {
+    name: "VX Nerve Agent",
+    category: "Chemical",
+    description:
+      "VX is a highly toxic nerve agent that interferes with the nervous system.",
+    symptoms: ["Muscle Twitching", "Sweating", "Blurred Vision"],
+    treatment:
+      "Administer atropine and pralidoxime, decontaminate immediately.",
+  },
+  {
+    name: "Sarin (GB)",
+    category: "Chemical",
+    description:
+      "Sarin is a volatile nerve agent that affects breathing and muscle control.",
+    symptoms: ["Shortness of Breath", "Headache", "Drooling"],
+    treatment: "Administer atropine, ventilatory support required.",
+  },
+  {
+    name: "Mustard Gas",
+    category: "Chemical",
+    description:
+      "Mustard gas causes severe chemical burns and blistering of skin and lungs.",
+    symptoms: ["Skin Irritation", "Eye Pain", "Nausea"],
+    treatment:
+      "Irrigate eyes and skin, symptomatic treatment, no specific antidote.",
+  },
+];
+
 export default function CWALookup() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
+  const filteredAgents = cwaAgents.filter((agent) =>
+    agent.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleViewTreatment = (agent) => {
+    const agentName = encodeURIComponent(agent.name);
+    const symptoms = encodeURIComponent(agent.symptoms.join(","));
+    navigate(`/treatment-guide?agent=${agentName}&symptoms=${symptoms}`);
+  };
+
   return (
     <DashboardLayout>
       <div className="p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">CWA Lookup</h1>
+          <h1 className="text-3xl font-bold text-white">Chemical Agent Lookup</h1>
           <p className="text-drdo-gray-light mt-1">
-            Search and browse chemical warfare agent database
+            Search and explore the chemical warfare agent database.
           </p>
         </div>
 
-        <Card className="bg-drdo-blue/30 border-drdo-blue-light backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold text-white flex items-center gap-3">
-              <Search className="h-6 w-6 text-drdo-primary" />
-              Agent Database
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pb-6">
-            <div className="flex items-center justify-center h-64 text-drdo-gray-light">
-              <div className="text-center">
-                <Search className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg mb-2">CWA Database Search</p>
-                <p className="text-sm">
-                  Access comprehensive information about chemical warfare
-                  agents, their properties, and detection methods.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Search agents by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-3 py-2 rounded-md bg-white/10 text-white border border-drdo-blue-light outline-none"
+          />
+        </div>
+
+        {filteredAgents.length === 0 ? (
+          <Card className="bg-drdo-blue/30 border-drdo-blue-light backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="text-xl font-semibold text-white flex items-center gap-3">
+                <Search className="h-6 w-6 text-drdo-primary" />
+                No Agents Found
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-drdo-gray-light pb-6">
+              No matching chemical agents found for “{searchQuery}”.
+            </CardContent>
+          </Card>
+        ) : (
+          filteredAgents.map((agent, index) => (
+            <Card
+              key={index}
+              className="mb-6 bg-drdo-blue/30 border-drdo-blue-light backdrop-blur-sm"
+            >
+              <CardHeader>
+                <CardTitle className="text-xl font-semibold text-white">
+                  {agent.name}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="text-drdo-gray-light space-y-2">
+                <p><strong>Category:</strong> {agent.category}</p>
+                <p><strong>Description:</strong> {agent.description}</p>
+                <p><strong>Symptoms:</strong> {agent.symptoms.join(", ")}</p>
+                <p><strong>Treatment:</strong> {agent.treatment}</p>
+                <button
+                  onClick={() => handleViewTreatment(agent)}
+                  className="mt-4 px-4 py-2 bg-drdo-primary text-white rounded-md"
+                >
+                  View Treatment Guide →
+                </button>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
     </DashboardLayout>
   );
