@@ -15,7 +15,6 @@ import {
   Activity,
   Stethoscope,
   Search,
-  BookOpen,
   ArrowRight,
 } from "lucide-react";
 
