@@ -48,7 +48,8 @@ export default function MedicalReport() {
   useEffect(() => {
     if (agent && mockAgentData[agent]) {
       const data = mockAgentData[agent];
-      const caseId = "CASE-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+      const caseId =
+        "CASE-" + Math.random().toString(36).substr(2, 6).toUpperCase();
       setReport({
         agent,
         classification: data.classification,
@@ -70,11 +71,11 @@ export default function MedicalReport() {
   };
 
   const handleDownloadPDF = () => {
+    if (!report) return;
+
     const doc = new jsPDF();
     doc.setFontSize(12);
     doc.text("Medical Report", 10, 10);
-    if (!report) return;
-
     doc.text(`Case ID: ${report.caseId}`, 10, 20);
     doc.text(`Agent: ${report.agent}`, 10, 30);
     doc.text(`Type: ${report.classification}`, 10, 40);
@@ -88,29 +89,46 @@ export default function MedicalReport() {
 
   return (
     <DashboardLayout>
-      <div className="p-8" ref={reportRef}>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Medical Report</h1>
-          <p className="text-drdo-gray-light mt-1">Case details and action plan.</p>
+      <div className="p-8 space-y-6 bg-white text-black" ref={reportRef}>
+        <div>
+          <h1 className="text-3xl font-bold text-drdo-dark">Medical Report</h1>
+          <p className="text-drdo-gray-dark mt-1">
+            Case details and action plan.
+          </p>
         </div>
 
-        <Card className="bg-drdo-blue/30 border-drdo-blue-light backdrop-blur-sm">
+        <Card className="bg-white border border-drdo-gray-light shadow-sm">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold text-white flex items-center gap-3">
+            <CardTitle className="text-xl font-semibold text-drdo-dark flex items-center gap-3">
               <FileText className="h-6 w-6 text-drdo-primary" />
               Case Report
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-drdo-gray-light space-y-4">
+
+          <CardContent className="space-y-4 text-drdo-gray-dark">
             {report ? (
               <div className="space-y-2">
-                <p><strong>Case ID:</strong> {report.caseId}</p>
-                <p><strong>Agent:</strong> {report.agent}</p>
-                <p><strong>Classification:</strong> {report.classification}</p>
-                <p><strong>Risk Level:</strong> {report.risk}</p>
-                <p><strong>Symptoms:</strong> {report.symptoms.join(", ")}</p>
-                <p><strong>Action:</strong> {report.action}</p>
-                <p><strong>Generated On:</strong> {report.createdAt}</p>
+                <p>
+                  <strong>Case ID:</strong> {report.caseId}
+                </p>
+                <p>
+                  <strong>Agent:</strong> {report.agent}
+                </p>
+                <p>
+                  <strong>Classification:</strong> {report.classification}
+                </p>
+                <p>
+                  <strong>Risk Level:</strong> {report.risk}
+                </p>
+                <p>
+                  <strong>Symptoms:</strong> {report.symptoms.join(", ")}
+                </p>
+                <p>
+                  <strong>Action:</strong> {report.action}
+                </p>
+                <p>
+                  <strong>Generated On:</strong> {report.createdAt}
+                </p>
               </div>
             ) : (
               <p>No report data available.</p>
@@ -122,19 +140,19 @@ export default function MedicalReport() {
                 placeholder="Doctor's Full Name"
                 value={doctorName}
                 onChange={(e) => setDoctorName(e.target.value)}
-                className="px-3 py-2 rounded w-full text-black"
+                className="px-4 py-2 rounded-md w-full text-black bg-white border border-drdo-gray-light shadow-sm focus:outline-none focus:ring-2 focus:ring-drdo-primary"
               />
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button
                   onClick={handleBack}
-                  className="px-4 py-2 bg-drdo-primary text-white rounded-md"
+                  className="px-4 py-2 bg-drdo-primary text-white rounded-md hover:bg-drdo-primary/90"
                 >
                   ← Back to Diagnosis
                 </button>
                 <button
                   onClick={handleDownloadPDF}
-                  className="px-4 py-2 bg-drdo-primary text-white rounded-md"
+                  className="px-4 py-2 bg-drdo-primary text-white rounded-md hover:bg-drdo-primary/90"
                 >
                   Download PDF
                 </button>

@@ -15,20 +15,20 @@ export default function EmergencyProtocol() {
     <DashboardLayout>
       <div className="p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Emergency Protocol</h1>
-          <p className="text-drdo-gray-light mt-1">
+          <h1 className="text-3xl font-bold text-drdo-heading">Emergency Protocol</h1>
+          <p className="text-drdo-subtext mt-1">
             Immediate steps to follow during chemical or biological exposure emergencies.
           </p>
         </div>
 
-        <Card className="bg-red-900/30 border-red-500/30 backdrop-blur-sm">
+        <Card className="bg-red-100 border border-red-300 shadow-md">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold text-red-300 flex items-center gap-3">
-              <AlertTriangle className="h-6 w-6 text-red-400" />
+            <CardTitle className="text-xl font-semibold text-red-700 flex items-center gap-3">
+              <AlertTriangle className="h-6 w-6 text-red-600" />
               Critical Emergency Actions
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-red-100 space-y-4 pb-6">
+          <CardContent className="text-gray-800 space-y-4 pb-6">
             <ol className="list-decimal list-inside space-y-2">
               <li>Evacuate exposed individuals to a safe location immediately.</li>
               <li>Ensure all personnel use proper protective equipment (PPE).</li>
@@ -42,7 +42,7 @@ export default function EmergencyProtocol() {
             <div className="flex flex-wrap gap-4 pt-6">
               <button
                 onClick={() => navigate("/")}
-                className="px-4 py-2 bg-drdo-primary text-white rounded-md"
+                className="px-4 py-2 bg-drdo-primary text-white rounded-md hover:bg-drdo-primary-dark transition"
               >
                 ← Back to Dashboard
               </button>

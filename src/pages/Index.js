@@ -56,20 +56,20 @@ export default function Index() {
 
   return (
     <DashboardLayout>
-      <div className="p-8 space-y-8">
+      <div className="p-8 space-y-8 bg-gray-50">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-3xl font-bold text-gray-800">
               Medical Management of CWA
             </h1>
-            <p className="text-drdo-gray-light mt-1">
+            <p className="text-gray-600 mt-1">
               Chemical Warfare Agent Detection & Treatment System
             </p>
           </div>
-          <div className="flex items-center gap-2 bg-drdo-primary/10 px-4 py-2 rounded-lg border border-drdo-primary/20">
-            <div className="h-2 w-2 bg-drdo-primary rounded-full animate-pulse"></div>
-            <span className="text-drdo-primary font-medium">System Active</span>
+          <div className="flex items-center gap-2 bg-green-100 px-4 py-2 rounded-lg border border-green-200">
+            <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+            <span className="text-green-600 font-medium">System Active</span>
           </div>
         </div>
 
@@ -78,57 +78,57 @@ export default function Index() {
           <DashboardCard
             title="Total CWA Agents"
             value={cwaAgents.length.toString()}
-            icon={<TestTube className="h-6 w-6 text-drdo-primary" />}
+            icon={<TestTube className="h-6 w-6 text-blue-500" />}
             trend="up"
             trendValue="+2 this month"
           />
           <DashboardCard
             title="Response Time"
             value="< 2 min"
-            icon={<Clock className="h-6 w-6 text-yellow-400" />}
+            icon={<Clock className="h-6 w-6 text-yellow-500" />}
           />
           <DashboardCard
             title="System Status"
             value="Online"
-            icon={<Activity className="h-6 w-6 text-drdo-primary" />}
+            icon={<Activity className="h-6 w-6 text-green-600" />}
           />
         </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Recent Cases */}
-          <Card className="bg-drdo-blue/30 border-drdo-blue-light backdrop-blur-sm">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-white">
+              <CardTitle className="text-xl font-semibold text-gray-800">
                 Recent Cases
               </CardTitle>
             </CardHeader>
-            <CardContent className="pb-4 space-y-4 text-drdo-gray-light">
+            <CardContent className="pb-4 space-y-4 text-gray-600">
               {recentCases.length === 0 ? (
                 <div className="text-center py-6">
-                  <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <Users className="h-8 w-8 mx-auto mb-2 text-gray-400" />
                   <p>No cases recorded today</p>
                 </div>
               ) : (
                 recentCases.map((caseItem) => (
                   <div
                     key={caseItem.id}
-                    className="flex justify-between items-center border-b border-drdo-blue-light/20 pb-2"
+                    className="flex justify-between items-center border-b border-gray-200 pb-2"
                   >
                     <div>
-                      <p className="text-white font-medium">
+                      <p className="text-gray-800 font-medium">
                         Case #{caseItem.id}
                       </p>
                       <p className="text-sm">
                         Symptoms: {caseItem.symptoms.join(", ")}
                       </p>
-                      <p className="text-xs mt-1 text-drdo-gray-light">
+                      <p className="text-xs mt-1 text-gray-500">
                         Reported at: {caseItem.reportedAt}
                       </p>
                     </div>
                     <Button
                       variant="ghost"
-                      className="text-drdo-primary hover:text-white"
+                      className="text-blue-600 hover:text-blue-800"
                       onClick={() =>
                         navigate(
                           `/diagnosis?symptoms=${encodeURIComponent(
@@ -147,15 +147,15 @@ export default function Index() {
           </Card>
 
           {/* Quick Actions */}
-          <Card className="bg-drdo-blue/30 border-drdo-blue-light backdrop-blur-sm">
+          <Card className="bg-white border border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-white">
+              <CardTitle className="text-xl font-semibold text-gray-800">
                 Quick Actions
               </CardTitle>
             </CardHeader>
             <CardContent className="pb-6 space-y-3">
               <Button
-                className="w-full justify-start bg-drdo-primary hover:bg-drdo-secondary text-white h-12"
+                className="w-full justify-start bg-blue-600 hover:bg-blue-700 text-white h-12"
                 size="lg"
                 onClick={() => navigate("/symptoms")}
               >
@@ -164,7 +164,7 @@ export default function Index() {
               </Button>
               <Button
                 variant="outline"
-                className="w-full justify-start border-drdo-blue-light bg-drdo-blue/20 hover:bg-drdo-blue/40 text-white h-12"
+                className="w-full justify-start border-gray-300 bg-gray-100 hover:bg-gray-200 text-gray-800 h-12"
                 size="lg"
                 onClick={() => navigate("/cwa-lookup")}
               >
@@ -176,25 +176,24 @@ export default function Index() {
         </div>
 
         {/* Agent Listing */}
-        <Card className="bg-drdo-blue/20 border-drdo-blue-light/50 backdrop-blur-sm">
+        <Card className="bg-white border border-gray-200 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold text-white">
+            <CardTitle className="text-xl font-semibold text-gray-800">
               Registered Chemical Agents
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-drdo-gray-light">
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-gray-700">
             {cwaAgents.map((agent, idx) => (
               <div
                 key={idx}
-                className="bg-white/5 p-4 rounded-lg border border-drdo-blue-light"
+                className="bg-gray-100 p-4 rounded-lg border border-gray-200"
               >
-                <p className="text-white font-medium">{agent.name}</p>
+                <p className="text-gray-800 font-medium">{agent.name}</p>
                 <p className="text-xs">Category: {agent.category}</p>
               </div>
             ))}
           </CardContent>
         </Card>
-
       </div>
     </DashboardLayout>
   );

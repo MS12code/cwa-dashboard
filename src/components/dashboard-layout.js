@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -22,39 +22,14 @@ import {
   Shield,
 } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
-import { useNavigate } from "react-router-dom"; // at the top of DashboardLayout component
 
 const menuItems = [
-  {
-    title: "Dashboard",
-    url: "/",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Symptoms",
-    url: "/symptoms",
-    icon: Stethoscope,
-  },
-  {
-    title: "Diagnosis",
-    url: "/diagnosis",
-    icon: Stethoscope,
-  },
-  {
-    title: "CWA Lookup",
-    url: "/cwa-lookup",
-    icon: Search,
-  },
-  {
-    title: "Treatment Guide",
-    url: "/treatment-guide",
-    icon: BookOpen,
-  },
-  {
-    title: "Medical Report",
-    url: "/medical-report",
-    icon: FileText,
-  },
+  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Symptoms", url: "/symptoms", icon: Stethoscope },
+  { title: "Diagnosis", url: "/diagnosis", icon: Stethoscope },
+  { title: "CWA Lookup", url: "/cwa-lookup", icon: Search },
+  { title: "Treatment Guide", url: "/treatment-guide", icon: BookOpen },
+  { title: "Medical Report", url: "/medical-report", icon: FileText },
 ];
 
 export function DashboardLayout({ children }) {
@@ -63,15 +38,15 @@ export function DashboardLayout({ children }) {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <Sidebar className="border-r-0">
+      <Sidebar className="bg-white border-r border-gray-200 min-h-screen">
         <SidebarHeader className="p-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-drdo-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
               <Shield className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-white">CWA</h1>
-              <p className="text-sm text-drdo-gray-light">Medical Management</p>
+              <h1 className="text-lg font-bold text-gray-800">CWA</h1>
+              <p className="text-sm text-gray-500">Medical Management</p>
             </div>
           </div>
         </SidebarHeader>
@@ -85,7 +60,7 @@ export function DashboardLayout({ children }) {
                     <SidebarMenuButton
                       asChild
                       isActive={location.pathname === item.url}
-                      className="data-[active=true]:bg-drdo-primary data-[active=true]:text-white hover:bg-drdo-primary/10 hover:text-drdo-primary"
+                      className="data-[active=true]:bg-blue-600 data-[active=true]:text-white hover:bg-blue-100 hover:text-blue-600 rounded-md px-2 py-1 transition"
                     >
                       <Link to={item.url}>
                         <item.icon className="h-4 w-4" />
@@ -100,24 +75,29 @@ export function DashboardLayout({ children }) {
         </SidebarContent>
 
         <SidebarFooter className="p-4">
-          <Alert className="bg-orange-500/10 border-orange-500/20">
-            <AlertTriangle className="h-4 w-4 text-orange-400" />
-            <AlertDescription className="text-sm text-orange-300">
-              <div className="font-medium mb-1">Emergency</div>
+          <Alert className="bg-red-50 border border-red-200">
+            <AlertTriangle className="h-4 w-4 text-red-400" />
+            <AlertDescription className="text-sm text-red-600">
+              <div className="font-semibold mb-1">Emergency</div>
               <div className="text-xs">
                 For immediate assistance, contact emergency services.
               </div>
             </AlertDescription>
           </Alert>
-          <div className="mt-2">
-            <button className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors" onClick={() => navigate("/emergency-protocol")}>
+          <div className="mt-3">
+            <button
+              className="w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition"
+              onClick={() => navigate("/emergency-protocol")}
+            >
               Emergency Protocol
             </button>
           </div>
         </SidebarFooter>
       </Sidebar>
 
-      <SidebarInset className="bg-drdo-dark">{children}</SidebarInset>
+      <SidebarInset className="bg-gray-50 min-h-screen p-6 overflow-y-auto">
+        {children}
+      </SidebarInset>
     </SidebarProvider>
   );
 }

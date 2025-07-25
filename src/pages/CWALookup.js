@@ -56,8 +56,8 @@ export default function CWALookup() {
     <DashboardLayout>
       <div className="p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white">Chemical Agent Lookup</h1>
-          <p className="text-drdo-gray-light mt-1">
+          <h1 className="text-3xl font-bold text-gray-900">Chemical Agent Lookup</h1>
+          <p className="text-gray-600 mt-1">
             Search and explore the chemical warfare agent database.
           </p>
         </div>
@@ -68,19 +68,19 @@ export default function CWALookup() {
             placeholder="Search agents by name..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-3 py-2 rounded-md bg-white/10 text-white border border-drdo-blue-light outline-none"
+            className="w-full px-4 py-2 rounded-md bg-white text-gray-800 border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
         </div>
 
         {filteredAgents.length === 0 ? (
-          <Card className="bg-drdo-blue/30 border-drdo-blue-light backdrop-blur-sm">
+          <Card className="bg-white border border-gray-300 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-xl font-semibold text-white flex items-center gap-3">
-                <Search className="h-6 w-6 text-drdo-primary" />
+              <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-3">
+                <Search className="h-6 w-6 text-blue-600" />
                 No Agents Found
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-drdo-gray-light pb-6">
+            <CardContent className="text-gray-600 pb-6">
               No matching chemical agents found for “{searchQuery}”.
             </CardContent>
           </Card>
@@ -88,21 +88,21 @@ export default function CWALookup() {
           filteredAgents.map((agent, index) => (
             <Card
               key={index}
-              className="mb-6 bg-drdo-blue/30 border-drdo-blue-light backdrop-blur-sm"
+              className="mb-6 bg-white border border-gray-300 shadow-sm"
             >
               <CardHeader>
-                <CardTitle className="text-xl font-semibold text-white">
+                <CardTitle className="text-xl font-semibold text-gray-900">
                   {agent.name}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="text-drdo-gray-light space-y-2">
+              <CardContent className="text-gray-700 space-y-2">
                 <p><strong>Category:</strong> {agent.category}</p>
                 <p><strong>Description:</strong> {agent.description}</p>
                 <p><strong>Symptoms:</strong> {agent.symptoms.join(", ")}</p>
                 <p><strong>Treatment:</strong> {agent.treatment}</p>
                 <button
                   onClick={() => handleViewTreatment(agent)}
-                  className="mt-4 px-4 py-2 bg-drdo-primary text-white rounded-md"
+                  className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition"
                 >
                   View Treatment Guide →
                 </button>
