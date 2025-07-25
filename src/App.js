@@ -11,6 +11,7 @@ import TreatmentGuide from "./pages/TreatmentGuide";
 import MedicalReport from "./pages/MedicalReport";
 import NotFound from "./pages/NotFound";
 import EmergencyProtocol from "./pages/EmergencyProtocol";
+import AnatomyNavigator from "./pages/AnatomyNavigator";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/anatomy-navigator" element={<AnatomyNavigator />} />
           <Route path="/symptoms" element={<Symptoms />} />
           <Route path="/diagnosis" element={<Diagnosis />} />
           <Route path="/cwa-lookup" element={<CWALookup />} />

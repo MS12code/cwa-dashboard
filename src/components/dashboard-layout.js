@@ -20,11 +20,13 @@ import {
   FileText,
   AlertTriangle,
   Shield,
+  MonitorDotIcon
 } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert";
 
 const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Anatomy Navigator", url: "/anatomy-navigator", icon: MonitorDotIcon },
   { title: "Symptoms", url: "/symptoms", icon: Stethoscope },
   { title: "Diagnosis", url: "/diagnosis", icon: Stethoscope },
   { title: "CWA Lookup", url: "/cwa-lookup", icon: Search },
