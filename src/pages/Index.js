@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "../components/dashboard-layout";
-import { DashboardCard } from "../components/dashboard-card";
+// import { DashboardCard } from "../components/dashboard-card";
 import {
   Card,
   CardContent,
@@ -9,10 +9,7 @@ import {
 } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import {
-  TestTube,
   Users,
-  Clock,
-  Activity,
   Stethoscope,
   Search,
   ArrowRight,
@@ -67,14 +64,14 @@ export default function Index() {
               Chemical Warfare Agent Detection & Treatment System
             </p>
           </div>
-          <div className="flex items-center gap-2 bg-green-100 px-4 py-2 rounded-lg border border-green-200">
+          {/* <div className="flex items-center gap-2 bg-green-100 px-4 py-2 rounded-lg border border-green-200">
             <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-green-600 font-medium">System Active</span>
-          </div>
+          </div> */}
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           <DashboardCard
             title="Total CWA Agents"
             value={cwaAgents.length.toString()}
@@ -92,7 +89,7 @@ export default function Index() {
             value="Online"
             icon={<Activity className="h-6 w-6 text-green-600" />}
           />
-        </div>
+        </div> */}
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
