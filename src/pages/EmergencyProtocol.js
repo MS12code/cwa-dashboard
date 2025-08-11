@@ -15,7 +15,7 @@ export default function EmergencyProtocol() {
     <DashboardLayout>
       <div className="p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-drdo-heading">Emergency Protocol</h1>
+          <h1 className="text-3xl font-bold text-drdo-heading">Emergency?</h1>
           <p className="text-drdo-subtext mt-1">
             Immediate steps to follow during chemical or biological exposure emergencies.
           </p>

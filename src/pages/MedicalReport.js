@@ -161,7 +161,7 @@ export default function MedicalReport() {
                 </p>
               </div>
             ) : (
-              <p>No report data available.</p>
+              <p>No report data available. Please start from the Anatomy Navigator step by step to generate the Report.</p>
             )}
 
             <div className="pt-4 space-y-3">
