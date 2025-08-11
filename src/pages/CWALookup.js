@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { DashboardLayout } from "../components/dashboard-layout";
 import {
@@ -9,47 +9,39 @@ import {
 } from "../components/ui/card";
 import { Search } from "lucide-react";
 
-const cwaAgents = [
-  {
-    name: "VX Nerve Agent",
-    category: "Chemical",
-    description:
-      "VX is a highly toxic nerve agent that interferes with the nervous system.",
-    symptoms: ["Muscle Twitching", "Sweating", "Blurred Vision"],
-    treatment:
-      "Administer atropine and pralidoxime, decontaminate immediately.",
-  },
-  {
-    name: "Sarin (GB)",
-    category: "Chemical",
-    description:
-      "Sarin is a volatile nerve agent that affects breathing and muscle control.",
-    symptoms: ["Shortness of Breath", "Headache", "Drooling"],
-    treatment: "Administer atropine, ventilatory support required.",
-  },
-  {
-    name: "Mustard Gas",
-    category: "Chemical",
-    description:
-      "Mustard gas causes severe chemical burns and blistering of skin and lungs.",
-    symptoms: ["Skin Irritation", "Eye Pain", "Nausea"],
-    treatment:
-      "Irrigate eyes and skin, symptomatic treatment, no specific antidote.",
-  },
-];
-
 export default function CWALookup() {
+  const [agents, setAgents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
   const navigate = useNavigate();
 
-  const filteredAgents = cwaAgents.filter((agent) =>
-    agent.name.toLowerCase().includes(searchQuery.toLowerCase())
+  useEffect(() => {
+    const fetchAgents = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch("http://127.0.0.1:8000/get_all_agents");
+        if (!res.ok) throw new Error("Failed to fetch agents");
+        const data = await res.json();
+        setAgents(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAgents();
+  }, []);
+
+  const filteredAgents = agents.filter((agent) =>
+    agent.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleViewTreatment = (agent) => {
-    const agentName = encodeURIComponent(agent.name);
-    const symptoms = encodeURIComponent(agent.symptoms.join(","));
-    navigate(`/treatment-guide?agent=${agentName}&symptoms=${symptoms}`);
+  const handleViewTreatment = (agentName) => {
+    navigate(`/treatment-guide?agent=${encodeURIComponent(agentName)}`);
   };
 
   return (
@@ -72,7 +64,10 @@ export default function CWALookup() {
           />
         </div>
 
-        {filteredAgents.length === 0 ? (
+        {loading && <p className="text-blue-600">Loading agents...</p>}
+        {error && <p className="text-red-600">{error}</p>}
+
+        {!loading && !error && filteredAgents.length === 0 && (
           <Card className="bg-white border border-gray-300 shadow-sm">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-3">
@@ -84,31 +79,31 @@ export default function CWALookup() {
               No matching chemical agents found for “{searchQuery}”.
             </CardContent>
           </Card>
-        ) : (
-          filteredAgents.map((agent, index) => (
-            <Card
-              key={index}
-              className="mb-6 bg-white border border-gray-300 shadow-sm"
-            >
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold text-gray-900">
-                  {agent.name}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-gray-700 space-y-2">
-                <p><strong>Category:</strong> {agent.category}</p>
-                <p><strong>Description:</strong> {agent.description}</p>
-                <p><strong>Symptoms:</strong> {agent.symptoms.join(", ")}</p>
-                <p><strong>Treatment:</strong> {agent.treatment}</p>
-                <button
-                  onClick={() => handleViewTreatment(agent)}
-                  className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition"
-                >
-                  View Treatment Guide →
-                </button>
-              </CardContent>
-            </Card>
-          ))
+        )}
+
+        {!loading && !error && filteredAgents.length > 0 && (
+          <div className="space-y-6">
+            {filteredAgents.map((agentName, idx) => (
+              <Card
+                key={idx}
+                className="bg-white border border-gray-300 shadow-sm"
+              >
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold text-gray-900">
+                    {agentName}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <button
+                    onClick={() => handleViewTreatment(agentName)}
+                    className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition"
+                  >
+                    View Treatment Guide →
+                  </button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
     </DashboardLayout>

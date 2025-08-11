@@ -16,6 +16,7 @@ export default function Symptoms() {
 
   const [selectedSymptoms, setSelectedSymptoms] = useState([]);
   const [symptomsList, setSymptomsList] = useState([]);
+  const [gender, setGender] = useState(""); // <-- Gender state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -33,7 +34,9 @@ export default function Symptoms() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`${process.env.REACT_APP_BASE_API_URL}/get_symptoms_by_system?human_system=${system}`);
+        const response = await fetch(
+          `${process.env.REACT_APP_BASE_API_URL}/get_symptoms_by_system?human_system=${system}`
+        );
         if (!response.ok) throw new Error("Failed to fetch symptoms");
         const data = await response.json();
         setSymptomsList(data);
@@ -56,8 +59,12 @@ export default function Symptoms() {
   };
 
   const handleDiagnose = () => {
-    const queryString = selectedSymptoms.map(encodeURIComponent).join(",");
-    navigate(`/diagnosis?symptoms=${queryString}`);
+    const symptomsParam = selectedSymptoms.map(encodeURIComponent).join(",");
+    navigate(
+      `/diagnosis?symptoms=${symptomsParam}&system=${encodeURIComponent(
+        system
+      )}&gender=${encodeURIComponent(gender)}`
+    );
   };
 
   return (
@@ -80,6 +87,20 @@ export default function Symptoms() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Gender dropdown */}
+            <div>
+              <label className="block text-gray-700 mb-2">Gender</label>
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="border border-gray-300 rounded-lg p-2 w-full"
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+
             {loading && <p>Loading symptoms...</p>}
             {error && <p className="text-red-600">{error}</p>}
 
@@ -108,7 +129,9 @@ export default function Symptoms() {
 
             <div className="pt-6 text-center">
               <Button
-                disabled={selectedSymptoms.length === 0}
+                disabled={
+                  selectedSymptoms.length === 0 || !gender || !system
+                }
                 onClick={handleDiagnose}
               >
                 Analyze Symptoms →

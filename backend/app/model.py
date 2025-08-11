@@ -41,12 +41,22 @@ class CwaModel:
         if 'severity' in self.df.columns:
             self.df['severity'] = self.df['severity'].map(severity_mapping).fillna(0).astype(float)
 
+        # Encode existing columns with label encoders
         for col in ['gender', 'symptoms', 'human_system']:
             le = self.label_encoders.get(col)
             if le:
                 self.df[col] = le.transform(self.df[col].astype(str))
             else:
                 self.df[col] = 0
+
+        # *** Add label encoder for 'agent' column ***
+        if 'agent' in self.df.columns:
+            le_agent = LabelEncoder()
+            self.df['agent_encoded'] = le_agent.fit_transform(self.df['agent'])
+            self.label_encoders['agent'] = le_agent
+        else:
+            # If 'agent' column not present, fallback
+            self.df['agent_encoded'] = 0
 
         self.feature_matrix = self.df[self.features].to_numpy()
 
@@ -77,6 +87,7 @@ class CwaModel:
 
     def find_best_row_among_agents(self, X_pred, agents_list):
         # Filter rows for given agents
+        # Use 'agent' column to match string agent names here (not encoded)
         df_candidates = self.df[self.df['agent'].isin(agents_list)].copy()
         if df_candidates.empty:
             return None

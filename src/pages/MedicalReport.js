@@ -10,61 +10,66 @@ import {
 } from "../components/ui/card";
 import { FileText } from "lucide-react";
 
-const mockAgentData = {
-  "VX Nerve Agent": {
-    symptoms: ["Blurred Vision", "Sweating", "Twitching"],
-    action: "Administer atropine + decontaminate. Provide oxygen.",
-    classification: "Chemical",
-    risk: "High",
-  },
-  "Botulinum Toxin": {
-    symptoms: ["Nausea", "Blurred Vision"],
-    action: "Administer antitoxin + monitor respiration.",
-    classification: "Biological",
-    risk: "High",
-  },
-};
-
 export default function MedicalReport() {
   const location = useLocation();
   const navigate = useNavigate();
   const [agent, setAgent] = useState("");
   const [symptoms, setSymptoms] = useState([]);
-  const [report, setReport] = useState(null);
+  const [gender, setGender] = useState("");
+  const [system, setSystem] = useState("");
+  const [medicines, setMedicines] = useState({});
   const [doctorName, setDoctorName] = useState("");
+  const [report, setReport] = useState(null);
   const reportRef = useRef();
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const agentParam = query.get("agent");
     const symptomsParam = query.get("symptoms");
+    const genderParam = query.get("gender");
+    const systemParam = query.get("system");
+    const medicinesParam = query.get("medicines");
+
     if (agentParam) setAgent(agentParam);
     if (symptomsParam) {
       const decoded = symptomsParam.split(",").map(decodeURIComponent);
       setSymptoms(decoded);
     }
+    if (genderParam) setGender(genderParam);
+    if (systemParam) setSystem(systemParam);
+    if (medicinesParam) {
+      try {
+        setMedicines(JSON.parse(decodeURIComponent(medicinesParam)));
+      } catch {
+        setMedicines({});
+      }
+    }
   }, [location.search]);
 
   useEffect(() => {
-    if (agent && mockAgentData[agent]) {
-      const data = mockAgentData[agent];
-      const caseId =
-        "CASE-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+    if (agent) {
+      const caseId = "CASE-" + Math.random().toString(36).substr(2, 6).toUpperCase();
       setReport({
-        agent,
-        classification: data.classification,
-        symptoms: data.symptoms,
-        action: data.action,
-        risk: data.risk,
-        createdAt: new Date().toLocaleString(),
         caseId,
+        agent,
+        symptoms,
+        gender,
+        system,
+        medicines,
+        createdAt: new Date().toLocaleString(),
       });
     }
-  }, [agent]);
+  }, [agent, symptoms, gender, system, medicines]);
 
   const handleBack = () => {
+    // Navigate back to diagnosis with current symptoms
     if (symptoms.length > 0) {
-      navigate(`/diagnosis?symptoms=${encodeURIComponent(symptoms.join(","))}`);
+      navigate(
+        `/diagnosis?` +
+          `symptoms=${encodeURIComponent(symptoms.join(","))}` +
+          `&gender=${encodeURIComponent(gender)}` +
+          `&system=${encodeURIComponent(system)}`
+      );
     } else {
       navigate("/diagnosis");
     }
@@ -74,16 +79,34 @@ export default function MedicalReport() {
     if (!report) return;
 
     const doc = new jsPDF();
+    doc.setFontSize(14);
+    doc.text("Medical Report", 10, 15);
+
     doc.setFontSize(12);
-    doc.text("Medical Report", 10, 10);
-    doc.text(`Case ID: ${report.caseId}`, 10, 20);
-    doc.text(`Agent: ${report.agent}`, 10, 30);
-    doc.text(`Type: ${report.classification}`, 10, 40);
-    doc.text(`Risk: ${report.risk}`, 10, 50);
-    doc.text(`Symptoms: ${report.symptoms.join(", ")}`, 10, 60);
-    doc.text(`Action: ${report.action}`, 10, 70);
-    doc.text(`Doctor: ${doctorName || "N/A"}`, 10, 80);
-    doc.text(`Created: ${report.createdAt}`, 10, 90);
+    doc.text(`Case ID: ${report.caseId}`, 10, 30);
+    doc.text(`Agent: ${report.agent}`, 10, 40);
+    doc.text(`Gender: ${report.gender}`, 10, 50);
+    doc.text(`System: ${report.system}`, 10, 60);
+    doc.text(`Symptoms:`, 10, 70);
+    report.symptoms.forEach((symptom, i) => {
+      doc.text(`- ${symptom}`, 15, 80 + i * 10);
+    });
+
+    let yPos = 80 + report.symptoms.length * 10 + 10;
+    doc.text("Recommended Medicines:", 10, yPos);
+    yPos += 10;
+    Object.entries(report.medicines)
+      .filter(([_, dose]) => dose > 0)
+      .forEach(([med, dose]) => {
+        doc.text(`- ${med.replace(/_/g, " ")}: ${dose}`, 15, yPos);
+        yPos += 10;
+      });
+
+    yPos += 10;
+    doc.text(`Doctor: ${doctorName || "N/A"}`, 10, yPos);
+    yPos += 10;
+    doc.text(`Generated On: ${report.createdAt}`, 10, yPos);
+
     doc.save(`${report.caseId}.pdf`);
   };
 
@@ -92,9 +115,7 @@ export default function MedicalReport() {
       <div className="p-8 space-y-6 bg-white text-black" ref={reportRef}>
         <div>
           <h1 className="text-3xl font-bold text-drdo-dark">Medical Report</h1>
-          <p className="text-drdo-gray-dark mt-1">
-            Case details and action plan.
-          </p>
+          <p className="text-drdo-gray-dark mt-1">Case details and action plan.</p>
         </div>
 
         <Card className="bg-white border border-drdo-gray-light shadow-sm">
@@ -115,17 +136,26 @@ export default function MedicalReport() {
                   <strong>Agent:</strong> {report.agent}
                 </p>
                 <p>
-                  <strong>Classification:</strong> {report.classification}
+                  <strong>Gender:</strong> {report.gender}
                 </p>
                 <p>
-                  <strong>Risk Level:</strong> {report.risk}
+                  <strong>System:</strong> {report.system}
                 </p>
                 <p>
                   <strong>Symptoms:</strong> {report.symptoms.join(", ")}
                 </p>
                 <p>
-                  <strong>Action:</strong> {report.action}
+                  <strong>Recommended Medicines:</strong>
                 </p>
+                <ul className="list-disc list-inside ml-4">
+                  {Object.entries(report.medicines)
+                    .filter(([_, dose]) => dose > 0)
+                    .map(([med, dose], idx) => (
+                      <li key={idx}>
+                        {med.replace(/_/g, " ")}: {dose}
+                      </li>
+                    ))}
+                </ul>
                 <p>
                   <strong>Generated On:</strong> {report.createdAt}
                 </p>

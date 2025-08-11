@@ -1,66 +1,57 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { DashboardLayout } from "../components/dashboard-layout";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { BookOpen } from "lucide-react";
-
-const treatmentData = {
-  "VX Nerve Agent": {
-    summary: "VX is a potent nerve agent. Immediate action is critical.",
-    protocol: [
-      "PPE for responders.",
-      "Remove victim from contaminated zone.",
-      "Administer atropine (2–6 mg IV every 5–10 min).",
-      "Pralidoxime (1–2 g IV over 15–30 min).",
-      "Maintain airway, oxygen support.",
-      "Decontaminate with soap + water.",
-    ],
-  },
-  "Botulinum Toxin": {
-    summary: "Botulinum toxin causes flaccid paralysis.",
-    protocol: [
-      "Supportive care + ventilation.",
-      "Administer antitoxin (CDC supply).",
-      "Hospitalization for observation.",
-    ],
-  },
-};
 
 export default function TreatmentGuide() {
   const location = useLocation();
   const navigate = useNavigate();
+
   const [selectedAgent, setSelectedAgent] = useState("");
-  const [symptomsString, setSymptomsString] = useState("");
-  const [treatment, setTreatment] = useState(null);
+  const [treatmentData, setTreatmentData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
     const agent = query.get("agent");
-    const symptomsParam = query.get("symptoms");
+
     if (agent) {
       setSelectedAgent(agent);
-      setTreatment(treatmentData[agent]);
-    }
-    if (symptomsParam) {
-      setSymptomsString(symptomsParam);
+      fetchTreatment(agent);
     }
   }, [location.search]);
 
-  const handleBack = () => {
-    navigate(`/diagnosis?symptoms=${encodeURIComponent(symptomsString)}`);
+  const fetchTreatment = async (agent) => {
+    setLoading(true);
+    setError(null);
+    setTreatmentData(null);
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_BASE_API_URL}/get_agent_details?agent_name=${encodeURIComponent(
+          agent
+        )}`
+      );
+      if (!res.ok) {
+        throw new Error(`Failed to fetch treatment details for ${agent}`);
+      }
+      const data = await res.json();
+      if (!data || data.length === 0) {
+        setError("No treatment data found for this agent.");
+        setTreatmentData(null);
+      } else {
+        // Store the raw data array here
+        setTreatmentData(data);
+      }
+    } catch (err) {
+      setError(err.message);
+      setTreatmentData(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const goToReport = () => {
-    navigate(
-      `/medical-report?agent=${encodeURIComponent(
-        selectedAgent
-      )}&symptoms=${encodeURIComponent(symptomsString)}`
-    );
+  const handleBack = () => {
+    navigate(`/cwa-lookup`);
   };
 
   return (
@@ -69,45 +60,80 @@ export default function TreatmentGuide() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-800">Treatment Guide</h1>
           <p className="text-slate-600 mt-1">
-            Protocols for handling chemical warfare exposure.
+            Treatment protocols for the selected chemical warfare agent.
           </p>
         </div>
 
-        {!treatment ? (
-          <p className="text-slate-600">No agent selected.</p>
-        ) : (
-          <Card className="bg-white border border-slate-200 shadow-md">
-            <CardHeader>
-              <CardTitle className="text-xl text-slate-800 flex items-center gap-3">
-                <BookOpen className="h-6 w-6 text-blue-600" />
-                {selectedAgent} Treatment Protocol
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-slate-700 space-y-4">
-              <p>
-                <strong>Summary:</strong> {treatment.summary}
-              </p>
-              <ul className="list-disc list-inside space-y-1">
-                {treatment.protocol.map((step, idx) => (
-                  <li key={idx}>{step}</li>
-                ))}
-              </ul>
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <button
-                  onClick={handleBack}
-                  className="px-4 py-2 bg-blue-100 text-blue-800 rounded-md border border-blue-300 hover:bg-blue-200 transition"
-                >
-                  ← Back to Diagnosis
-                </button>
-                <button
-                  onClick={goToReport}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
-                >
-                  Generate Medical Report →
-                </button>
-              </div>
-            </CardContent>
-          </Card>
+        {loading && <p className="text-blue-600">Loading treatment details...</p>}
+        {error && <p className="text-red-600">{error}</p>}
+
+        {!loading && !error && !treatmentData && (
+          <p className="text-slate-600">No agent selected or no data available.</p>
+        )}
+
+        {!loading && !error && treatmentData && (
+          <>
+            <h2 className="text-xl font-semibold mb-6">{selectedAgent} Treatment Details</h2>
+            <div className="overflow-x-auto">
+              <table className="min-w-full border border-slate-300 rounded-md text-left">
+                <thead className="bg-slate-100">
+                  <tr>
+                    {Object.keys(treatmentData[0]).map((key) => {
+                      const formattedKey = key
+                        .replace(/_/g, " ")
+                        .replace(/\b\w/g, (c) => c.toUpperCase());
+                      return (
+                        <th
+                          key={key}
+                          className="border border-slate-300 px-3 py-2 sticky top-0"
+                        >
+                          {formattedKey}
+                        </th>
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {treatmentData.map((entry, idx) => (
+                    <tr
+                      key={idx}
+                      className={idx % 2 === 0 ? "bg-white" : "bg-slate-50"}
+                    >
+                      {Object.entries(entry).map(([key, value]) => {
+                        // Format gender values 0/1 -> Female/Male
+                        if (key === "gender") {
+                          value = value === 0 ? "Female" : value === 1 ? "Male" : value;
+                        }
+
+                        // Format numbers to fixed decimals if needed
+                        if (typeof value === "number") {
+                          value = Number.isInteger(value) ? value : value.toFixed(2);
+                        }
+
+                        return (
+                          <td
+                            key={key}
+                            className="border border-slate-300 px-3 py-2 align-top max-w-xs break-words"
+                          >
+                            {String(value)}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-8">
+              <button
+                onClick={handleBack}
+                className="px-4 py-2 bg-blue-100 text-blue-800 rounded-md border border-blue-300 hover:bg-blue-200 transition"
+              >
+                ← Back to CWA Lookup
+              </button>
+            </div>
+          </>
         )}
       </div>
     </DashboardLayout>

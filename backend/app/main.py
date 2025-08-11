@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from app.model import CwaModel
@@ -93,3 +94,22 @@ def get_symptoms_by_system(human_system: str = Query(..., example="Respiratory")
             continue
 
     return sorted(symptoms_set)
+
+@app.get("/get_agent_details")
+def get_agent_details(agent_name: str = Query(..., example="Chlorine")):
+    if "agent" not in model.df.columns:
+        raise HTTPException(status_code=500, detail="Dataset missing 'agent' column")
+
+    # Normalize agent name input
+    agent_name_norm = agent_name.strip().lower()
+
+    # Normalize agent names in df (create normalized column if not exists)
+    if 'agent_norm' not in model.df.columns:
+        model.df['agent_norm'] = model.df['agent'].str.strip().str.lower()
+
+    df_filtered = model.df[model.df['agent_norm'] == agent_name_norm]
+
+    if df_filtered.empty:
+        raise HTTPException(status_code=404, detail=f"No data found for agent '{agent_name}'")
+
+    return df_filtered.to_dict(orient="records")

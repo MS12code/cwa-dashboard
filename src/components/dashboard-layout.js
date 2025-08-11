@@ -29,9 +29,9 @@ const menuItems = [
   { title: "Anatomy Navigator", url: "/anatomy-navigator", icon: MonitorDotIcon },
   { title: "Symptoms", url: "/symptoms", icon: Stethoscope },
   { title: "Diagnosis", url: "/diagnosis", icon: Stethoscope },
+  { title: "Medical Report", url: "/medical-report", icon: FileText },
   { title: "CWA Lookup", url: "/cwa-lookup", icon: Search },
   { title: "Treatment Guide", url: "/treatment-guide", icon: BookOpen },
-  { title: "Medical Report", url: "/medical-report", icon: FileText },
 ];
 
 export function DashboardLayout({ children }) {
