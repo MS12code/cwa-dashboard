@@ -11,6 +11,9 @@ app = FastAPI(title="CWA Agent Prediction API")
 origins = [
     "http://localhost",
     "http://localhost:3001",
+    "https://cwa-dashboard.onrender.com/",
+    "https://cwa-dashboard.onrender.com",
+    "cwa-dashboard.onrender.com/"
 ]
 
 app.add_middleware(
