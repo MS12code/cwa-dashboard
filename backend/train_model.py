@@ -54,13 +54,26 @@ class Trainer:
             X = df_agent[self.features]
             y = df_agent['severity']
 
-            model = RandomForestRegressor(n_estimators=100, random_state=42)
+            model = RandomForestRegressor(
+                n_estimators=200,        # More trees for stability
+                max_features='sqrt',     # Use sqrt of features at each split (more randomness)
+                max_depth=10,            # Limit tree depth to reduce overfitting
+                min_samples_split=4,     # Require at least 4 samples to split
+                min_samples_leaf=2,      # Leaf must have at least 2 samples
+                max_samples=0.8,         # Each tree trains on 80% random subset
+                random_state=42
+            )
             model.fit(X, y)
 
             self.agent_models[agent] = model
 
             meds = df_agent[self.medicine_columns].mean().to_dict()
             self.agent_to_medicine[agent] = meds
+
+            importances = model.feature_importances_
+            feature_importance_pairs = list(zip(self.features, importances))
+            feature_importance_pairs.sort(key=lambda x: x[1], reverse=True)
+
 
     def save_models(self, path):
         with open(path, "wb") as f:
