@@ -22,7 +22,7 @@ export default function CWALookup() {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch("http://127.0.0.1:8000/get_all_agents");
+        const res = await fetch(`${process.env.REACT_APP_BASE_API_URL}/get_all_agents`);
         if (!res.ok) throw new Error("Failed to fetch agents");
         const data = await res.json();
         setAgents(data);
