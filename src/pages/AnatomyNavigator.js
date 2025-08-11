@@ -1,25 +1,13 @@
-import { useState } from "react";
 import { DashboardLayout } from "../components/dashboard-layout";
 import "./AnatomyNavigator.css"; // Import your CSS for better positioning
+import { useNavigate } from "react-router-dom";
 
 export default function AnatomyNavigator() {
 
-    const systemSymptomsMap = {
-        "Nervous": ["Convulsions", "Loss of Consciousness", "Tremors"],
-        "Respiratory": ["Shortness of Breath", "Pulmonary Edema", "Excessive Mucus"],
-        "Ocular": ["Blurred Vision", "Miosis (Pinpoint Pupils)", "Eye Irritation"],
-        "Musculoskeletal": ["Muscle Weakness", "Involuntary Twitching"],
-        "Digestive & Reproductive": ["Nausea", "Diarrhea", "Abdominal Pain", "Reproductive Disruption", "Increased Urination", "Kidney Damage", "Hormonal Imbalance", "Metabolism Disruption"],
-    };
-
-    const [selectedSystem, setSelectedSystem] = useState({ name: null, symptoms: [] });
+    const navigate = useNavigate();
 
     const handleSelectSystem = (systemName) => {
-        const symptoms = systemSymptomsMap[systemName] || ["No symptoms found"];
-        setSelectedSystem({ name: systemName, symptoms });
-        console.log("Selected System:", systemName, "Symptoms:", symptoms);
-
-        // You can call an API here using systemName
+        navigate(`/symptoms?system=${encodeURIComponent(systemName)}`);
     };
 
     return (
@@ -29,18 +17,18 @@ export default function AnatomyNavigator() {
                 {/* === HUMAN BODY SVG PARTS === */}
                 <div className="svg-body-container">
                     <div className="human-body">
-                        <g onClick={() => handleSelectSystem("Nervous")}>
+                        <g onClick={() => handleSelectSystem("Nervous")} title="Nervous System">
                             <svg id="head" width="80.3" height="100" viewBox="0 0 181 250" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12.6756 53L11.663 110.643L0 109.49L3 142L18.663 148L30.6756 198L62.6756 250H120.676L156.676 198L164.676 143L178.676 132L180.676 103L169.676 104L168.676 49.0808C168.676 49.0808 125.105 -0.230752 88.6756 0.999954C52.7339 2.21418 12.6756 53 12.6756 53Z" fill="#D9D9D9" />
                             </svg>
                         </g>
-                        <g onClick={() => handleSelectSystem("Ocular")}>
+                        <g onClick={() => handleSelectSystem("Ocular")} title="Ocular System">
                             <svg id="orbit" width="40" height="10" viewBox="0 0 96 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <ellipse cx="15" cy="10" rx="15" ry="10" fill="#EEEEEE" />
                                 <ellipse cx="81" cy="10" rx="15" ry="10" fill="#EEEEEE" />
                             </svg>
                         </g>
-                        <g onClick={() => handleSelectSystem("Respiratory")}>
+                        <g onClick={() => handleSelectSystem("Respiratory")} title="Respiratory System">
                             <svg id="neck" width="70" height="80" viewBox="0 0 149 126" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M10.2703 0L52.2973 53.9L76 126L28.7568 111.3L0 27.3L10.2703 0Z" fill="#D9D9D9" />
                                 <path d="M142 0L149 16L126 98L82 126L96 56L142 0Z" fill="#D9D9D9" />
@@ -52,7 +40,7 @@ export default function AnatomyNavigator() {
                             </svg>
                         </g>
 
-                        <g onClick={() => handleSelectSystem("Musculoskeletal")}>
+                        <g onClick={() => handleSelectSystem("Musculoskeletal")} title="Musculoskeletal System">
                             <svg id="right-shoulder" width="75" height="110" viewBox="0 0 154 218" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M135 0L154 52H105L73 36L135 0Z" fill="#D9D9D9" />
                                 <path d="M35 51H53.916L0 151.214V107L35 51Z" fill="#D9D9D9" />
@@ -90,7 +78,7 @@ export default function AnatomyNavigator() {
                             </svg>
                         </g>
 
-                        <g onClick={() => handleSelectSystem("Digestive & Reproductive")}>
+                        <g onClick={() => handleSelectSystem("Digestive")} title="Digestive System">
                             <svg id="abdomen" width="180" height="230" viewBox="0 0 293 420" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M129 11L128 54L77 85V41L129 11Z" fill="#D9D9D9" />
                                 <path d="M128 73V127L76 136V105L128 73Z" fill="#D9D9D9" />
@@ -127,7 +115,7 @@ export default function AnatomyNavigator() {
                             </svg>
                         </g>
 
-                        <g onClick={() => handleSelectSystem("Musculoskeletal")}>
+                        <g onClick={() => handleSelectSystem("Musculoskeletal")} title="Musculoskeletal System">
                             <svg id="right-leg" width="162" height="350" viewBox="0 0 162 756" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M23.0673 0L33 97.5L0 299.5V162L23.0673 0Z" fill="#D9D9D9" />
                                 <path d="M38 3.5L151 176V252L117 164L41 85.5L38 3.5Z" fill="#D9D9D9" />
@@ -171,30 +159,9 @@ export default function AnatomyNavigator() {
 
                 {/* === SELECTED SYSTEM DISPLAY === */}
                 <div className="selected-system-display">
-                    {selectedSystem ? (
-                        <div className="result-box">
-                            <div className="selected-system-display">
-                                {selectedSystem && selectedSystem.name ? (
-                                    <div className="result-box">
-                                        <h2>🧬 <strong>{selectedSystem.name} System</strong></h2><br/><br/>
-                                        <ul>
-                                            {selectedSystem.symptoms.map((symptom, index) => (
-                                                <li key={index}>{symptom}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                ) : (
-                                    <div className="result-box">
-                                        🧍 Click on any body system to select and view symptoms
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="result-box">
-                            🧍 Click on any body system to select
-                        </div>
-                    )}
+                    <div className="result-box">
+                        Click on any body system to select and view symptoms
+                    </div>
                 </div>
             </div>
         </DashboardLayout>

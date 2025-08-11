@@ -1,9 +1,24 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from app.model import CwaModel
 
 app = FastAPI(title="CWA Agent Prediction API")
+
+# Add this before defining your routes:
+origins = [
+    "http://localhost",
+    "http://localhost:3001",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,        # Allows only these origins to access
+    allow_credentials=True,
+    allow_methods=["*"],          # Allows all HTTP methods (GET, POST, etc)
+    allow_headers=["*"],          # Allows all headers
+)
 
 model = CwaModel(model_path="models_cwa.pkl", dataset_path="cwa_dataset.xlsx")
 
@@ -51,3 +66,30 @@ async def predict_agent(data: PredictInput):
         return prediction
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.get("/get_symptoms_by_system")
+def get_symptoms_by_system(human_system: str = Query(..., example="Respiratory")):
+    le_hs = model.label_encoders.get('human_system')
+    le_symptoms = model.label_encoders.get('symptoms')
+    if le_hs is None or le_symptoms is None:
+        raise HTTPException(status_code=500, detail="Label encoders not found")
+
+    # Encode the input human_system string to its numeric form
+    try:
+        encoded_hs = le_hs.transform([human_system.lower() if human_system.islower() else human_system])[0]
+    except Exception:
+        raise HTTPException(status_code=404, detail=f"Human system '{human_system}' not found")
+
+    # Filter df rows with matching human_system
+    df_filtered = model.df[model.df['human_system'] == encoded_hs]
+
+    symptoms_set = set()
+    for encoded_sym in df_filtered['symptoms'].unique():
+        try:
+            decoded = le_symptoms.inverse_transform([encoded_sym])[0]
+            split_syms = [s.strip() for s in decoded.split(',')]
+            symptoms_set.update(split_syms)
+        except Exception:
+            continue
+
+    return sorted(symptoms_set)
