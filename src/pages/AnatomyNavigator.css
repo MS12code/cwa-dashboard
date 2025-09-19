@@ -17,6 +17,7 @@
     left: 50%;
 }
 
+/* Head and Ocular Systems */
 .human-body svg#head {
     margin-left: -27px;
     top: -6px;
@@ -27,6 +28,7 @@
     top: 27px;
 }
 
+/* Respiratory System */
 .human-body svg#neck {
     margin-left: -21px;
     top: 70px;
@@ -37,6 +39,7 @@
     top: 140px;
 }
 
+/* Musculoskeletal System */
 .human-body svg#right-shoulder {
     margin-left: -90px;
     top: 100px;
@@ -67,11 +70,13 @@
     top: 336px;
 }
 
+/* Abdominal and Digestive Systems */
 .human-body svg#abdomen {
     margin-left: -70px;
     top: 210px;
 }
 
+/* Lower Body */
 .human-body svg#right-leg {
     margin-left: -110px;
     top: 420px;
@@ -94,6 +99,22 @@
     top: 771px;
 }
 
+/* New: Circulatory System */
+.human-body svg#circulatory-system {
+    /* Moves the SVG down to the upper torso/chest area, between the lungs */
+    top: 140px;
+    /* Centers it horizontally within the torso. The -5px accounts for the SVG's 10px width. */
+    margin-left: 10px;
+    border-radius: 100%;
+    /* Ensures it sits correctly in the layer stack, above the chest SVG */
+    z-index: 10;
+}
+
+/* This is a separate rule to make the line clickable and have a hover effect */
+.human-body svg#circulatory-system:hover rect {
+    fill: #f14d49;
+}
+/* Hover effect for ellipses (used for ocular system) */
 .human-body svg:hover ellipse {
     fill: #f14d49;
 }

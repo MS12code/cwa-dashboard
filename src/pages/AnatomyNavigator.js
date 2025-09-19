@@ -1,5 +1,5 @@
 import { DashboardLayout } from "../components/dashboard-layout";
-import "./AnatomyNavigator.css"; // Import your CSS for better positioning
+import "./AnatomyNavigator.css";
 import { useNavigate } from "react-router-dom";
 
 export default function AnatomyNavigator() {
@@ -12,41 +12,51 @@ export default function AnatomyNavigator() {
 
     return (
         <DashboardLayout>
-
             <div className="anatomy-container">
                 {/* === HUMAN BODY SVG PARTS === */}
                 <div className="svg-body-container">
                     <div className="human-body">
+                        {/* Nervous System */}
                         <g onClick={() => handleSelectSystem("Nervous")} title="Nervous System">
                             <svg id="head" width="80.3" height="100" viewBox="0 0 181 250" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12.6756 53L11.663 110.643L0 109.49L3 142L18.663 148L30.6756 198L62.6756 250H120.676L156.676 198L164.676 143L178.676 132L180.676 103L169.676 104L168.676 49.0808C168.676 49.0808 125.105 -0.230752 88.6756 0.999954C52.7339 2.21418 12.6756 53 12.6756 53Z" fill="#D9D9D9" />
                             </svg>
                         </g>
+
+                        {/* Ocular System */}
                         <g onClick={() => handleSelectSystem("Ocular")} title="Ocular System">
                             <svg id="orbit" width="40" height="10" viewBox="0 0 96 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <ellipse cx="15" cy="10" rx="15" ry="10" fill="#EEEEEE" />
                                 <ellipse cx="81" cy="10" rx="15" ry="10" fill="#EEEEEE" />
                             </svg>
                         </g>
+
+                        {/* Respiratory System */}
                         <g onClick={() => handleSelectSystem("Respiratory")} title="Respiratory System">
                             <svg id="neck" width="70" height="80" viewBox="0 0 149 126" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M10.2703 0L52.2973 53.9L76 126L28.7568 111.3L0 27.3L10.2703 0Z" fill="#D9D9D9" />
                                 <path d="M142 0L149 16L126 98L82 126L96 56L142 0Z" fill="#D9D9D9" />
                             </svg>
-
                             <svg id="chest" width="150" height="80" viewBox="0 0 289 165" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M53 0L114 13L132 121L71 165L23 148V97L0 70L35 55L53 0Z" fill="#D9D9D9" />
                                 <path d="M221 0L252 50.2069H289L277 76V128L227 162L160.407 116L166.407 10.2069L221 0Z" fill="#D9D9D9" />
                             </svg>
                         </g>
 
+                        {/* Separate, clickable group for the Circulatory System */}
+                        <g onClick={() => handleSelectSystem("Circulatory")} title="Circulatory System">
+                            <svg id="circulatory-system" width="20" height="300" viewBox="0 0 10 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="3.5" y="0" width="3" height="300" fill="#D9D9D9" />
+                            </svg>
+                        </g>
+
+                        {/* Musculoskeletal System */}
                         <g onClick={() => handleSelectSystem("Musculoskeletal")} title="Musculoskeletal System">
                             <svg id="right-shoulder" width="75" height="110" viewBox="0 0 154 218" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M135 0L154 52H105L73 36L135 0Z" fill="#D9D9D9" />
                                 <path d="M35 51H53.916L0 151.214V107L35 51Z" fill="#D9D9D9" />
                                 <path d="M58.916 55.2145H99.916L74.916 142.214L35.916 165.214L4.91602 217.214V155.214L58.916 55.2145Z" fill="#D9D9D9" />
                             </svg>
-
                             <svg id="right-arm" width="100" height="190" viewBox="0 0 223 445" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M193 0L223 42L183 167L104 200V181L160 48L193 0Z" fill="#D9D9D9" />
                                 <path d="M144 14L98 191L110 69L144 14Z" fill="#D9D9D9" />
@@ -54,17 +64,14 @@ export default function AnatomyNavigator() {
                                 <path d="M90 210L100 256L18 432L0 422L36 302L90 210Z" fill="#D9D9D9" />
                                 <path d="M163 234L149 295L48 445L25 439L114 253L163 234Z" fill="#D9D9D9" />
                             </svg>
-
                             <svg id="right-hand" width="60" height="90" viewBox="0 0 127 170" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M70 0L85 27L123 32C123 32 124.421 62.7655 126 83C128.63 116.709 111 170 111 170H100L107 131L96 126L83 167L70 165L81 119L72 113L55 158L41 157L58 106L49 101L27 151L17 149L41 66L37 53L6 73L0 66L27 27L70 0Z" fill="#D9D9D9" />
                             </svg>
-
                             <svg id="left-shoulder" width="100" height="110" viewBox="0 0 193 210" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M87 65L185 141L193 210L163 173L113 155L53 101L87 65Z" fill="#D9D9D9" />
                                 <path d="M111 48L179 106L191 141L93 57L111 48Z" fill="#D9D9D9" />
                                 <path d="M11 0L95 50L63 64L0 50L11 0Z" fill="#D9D9D9" />
                             </svg>
-
                             <svg id="left-arm" width="100" height="190" viewBox="0 0 206 438" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M30 0L0 42L40 167L119 200V181L63 48L30 0Z" fill="#D9D9D9" />
                                 <path d="M78 35L126 173L113 63L78 35Z" fill="#D9D9D9" />
@@ -72,12 +79,12 @@ export default function AnatomyNavigator() {
                                 <path d="M122 206V261L190 422L206 414L176 298L122 206Z" fill="#D9D9D9" />
                                 <path d="M54 225L68 286L154 438L180 426L104 250L54 225Z" fill="#D9D9D9" />
                             </svg>
-
                             <svg id="left-hand" width="60" height="170" viewBox="0 0 127 170" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M56.2675 0L41.2675 27L2.26746 36C2.26746 36 1.84616 62.7655 0.267456 83C-2.36253 116.709 15.2675 170 15.2675 170H26.2675L19.2675 131L30.2675 126L43.2675 167L56.2675 165L45.2675 119L54.2675 113L71.2675 158L85.2675 157L68.2675 106L77.2675 101L99.2675 151L109.267 149L85.2675 66L89.2675 53L120.267 73L126.267 66L99.2675 27L56.2675 0Z" fill="#D9D9D9" />
                             </svg>
                         </g>
 
+                        {/* Digestive System */}
                         <g onClick={() => handleSelectSystem("Digestive")} title="Digestive System">
                             <svg id="abdomen" width="180" height="230" viewBox="0 0 293 420" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M129 11L128 54L77 85V41L129 11Z" fill="#D9D9D9" />
@@ -114,7 +121,8 @@ export default function AnatomyNavigator() {
                                 </defs>
                             </svg>
                         </g>
-
+                        
+                        {/* Musculoskeletal System - Continued */}
                         <g onClick={() => handleSelectSystem("Musculoskeletal")} title="Musculoskeletal System">
                             <svg id="right-leg" width="162" height="350" viewBox="0 0 162 756" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M23.0673 0L33 97.5L0 299.5V162L23.0673 0Z" fill="#D9D9D9" />
@@ -130,11 +138,9 @@ export default function AnatomyNavigator() {
                                 <path d="M29.7076 449L62.7076 521L57.7076 667L75.7076 751H57.7076L13 587L29.7076 449Z" fill="#D9D9D9" />
                                 <path d="M110 506L129 562L121 626L102.5 662L89 756L87 662V592L110 506Z" fill="#D9D9D9" />
                             </svg>
-
                             <svg id="right-foot" width="60" height="50" viewBox="0 0 86 90" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M68 0L86 30L80 90H68L64 78L59 90L5 88L0 69L22 22L68 0Z" fill="#D9D9D9" />
                             </svg>
-
                             <svg id="left-leg" width="156" height="350" viewBox="0 0 156 769" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M132.933 0L123 97.5L146 302L156 172L132.933 0Z" fill="#D9D9D9" />
                                 <path d="M114 24L11 208L4 304.5L38 216.5L114 112V24Z" fill="#D9D9D9" />
@@ -149,13 +155,12 @@ export default function AnatomyNavigator() {
                                 <path d="M113 468L80 540L85 686L67 764L85 768L129.708 606L113 468Z" fill="#D9D9D9" />
                                 <path d="M24 519L11 575L19 639L37.5 675L51 769L53 675V605L24 519Z" fill="#D9D9D9" />
                             </svg>
-
                             <svg id="left-foot" width="60" height="50" viewBox="0 0 86 90" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M18 0L0 30L6 90H18L22 78L27 90L81 88L86 69L64 22L18 0Z" fill="#D9D9D9" />
                             </svg>
                         </g>
-
-                    </div></div>
+                    </div>
+                </div>
 
                 {/* === SELECTED SYSTEM DISPLAY === */}
                 <div className="selected-system-display">
