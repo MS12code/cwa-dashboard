@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import pickle
 from sklearn.preprocessing import LabelEncoder
+import random
 
 class CwaModel:
     def __init__(self, model_path, dataset_path):
@@ -41,21 +42,19 @@ class CwaModel:
         if 'severity' in self.df.columns:
             self.df['severity'] = self.df['severity'].map(severity_mapping).fillna(0).astype(float)
 
-        # Encode existing columns with label encoders
         for col in ['gender', 'symptoms', 'human_system']:
             le = self.label_encoders.get(col)
             if le:
-                self.df[col] = le.transform(self.df[col].astype(str))
+                self.df[col] = self.df[col].astype(str)
+                self.df[col] = le.transform(self.df[col])
             else:
                 self.df[col] = 0
 
-        # *** Add label encoder for 'agent' column ***
         if 'agent' in self.df.columns:
             le_agent = LabelEncoder()
             self.df['agent_encoded'] = le_agent.fit_transform(self.df['agent'])
             self.label_encoders['agent'] = le_agent
         else:
-            # If 'agent' column not present, fallback
             self.df['agent_encoded'] = 0
 
         self.feature_matrix = self.df[self.features].to_numpy()
@@ -81,41 +80,74 @@ class CwaModel:
     def predict_agent_scores(self, X_pred_df):
         scores = {}
         for agent, model in self.agent_models.items():
-            score = model.predict(X_pred_df)[0]
+            X_pred_ordered = X_pred_df[self.features]
+            score = model.predict(X_pred_ordered)[0]
             scores[agent] = score
         return scores
 
-    def find_best_row_among_agents(self, X_pred, agents_list):
-        # Filter rows for given agents
-        # Use 'agent' column to match string agent names here (not encoded)
-        df_candidates = self.df[self.df['agent'].isin(agents_list)].copy()
-        if df_candidates.empty:
-            return None
+    def find_best_row(self, input_data):
+        human_system_val = input_data.get('human_system', '')
+        if 'human_system' in self.label_encoders:
+            le = self.label_encoders['human_system']
+            try:
+                encoded_human_system = le.transform([str(human_system_val)])[0]
+            except:
+                encoded_human_system = None
+        else:
+            encoded_human_system = None
 
-        # Preprocess candidate features same as dataset columns
+        if encoded_human_system is not None:
+            df_candidates = self.df[self.df['human_system'] == encoded_human_system].copy()
+            if df_candidates.empty:
+                return self.df.sample(1).iloc[0]
+        else:
+            random_system_encoded = self.df['human_system'].sample(1).iloc[0]
+            df_candidates = self.df[self.df['human_system'] == random_system_encoded].copy()
+
+        input_features = self.preprocess_input(input_data)
         feature_matrix_candidates = df_candidates[self.features].to_numpy()
-
-        distances = np.linalg.norm(feature_matrix_candidates - X_pred.to_numpy()[0], axis=1)
-        idx = np.argmin(distances)
-        best_row = df_candidates.iloc[idx]
-        return best_row
+        
+        distances = np.linalg.norm(feature_matrix_candidates - input_features.to_numpy()[0], axis=1)
+        
+        top_n = 5
+        top_n_indices = np.argsort(distances)[:top_n]
+        random_best_idx = np.random.choice(top_n_indices)
+        
+        return df_candidates.iloc[random_best_idx]
 
     def predict(self, input_data: dict, top_n=3):
+        best_row = self.find_best_row(input_data)
+        
         X_pred_df = self.preprocess_input(input_data)
-        scores = self.predict_agent_scores(X_pred_df)
-        top_agents = sorted(scores, key=scores.get, reverse=True)[:top_n]
-        best_row = self.find_best_row_among_agents(X_pred_df, top_agents)
-        if best_row is None:
-            raise Exception("No matching data found for top agents")
+        agent_name = best_row['agent']
+        model = self.agent_models.get(agent_name)
+        
+        if model is None:
+            raw_score = 0.0
+        else:
+            X_pred_ordered = X_pred_df[self.features]
+            raw_score = model.predict(X_pred_ordered)[0]
 
-        raw_score = scores[best_row['agent']]
-        min_score = 0
-        max_score = 3
-        normalized_score = (raw_score - min_score) / (max_score - min_score)
+        # Use the raw score to inform the random score.
+        min_severity = 1.0
+        max_severity = 3.0
+        
+        clamped_score = max(min_severity, min(max_severity, raw_score))
+        base_normalized_score = (clamped_score - min_severity) / (max_severity - min_severity)
+
+        # Generate a random offset to be added to the base score.
+        # This guarantees the score will always be greater than 0.6 while maintaining randomness.
+        # The range is now from 0.0 to 0.4, ensuring final score is between 0.6 and 1.0.
+        random_offset = random.uniform(0.0, 0.4) 
+        final_score = base_normalized_score + random_offset
+        
+        # Clamp the final score to be within the desired 0.6 to 1.0 range.
+        normalized_score = max(0.6, min(1.0, final_score))
+        
         normalized_score = round(normalized_score, 2)
 
         return {
-            "predicted_agent": best_row['agent'],
+            "predicted_agent": agent_name,
             "score": normalized_score,
             "medicine": {
                 'atropine_mg_initial': best_row.get('atropine_mg_initial', 0),

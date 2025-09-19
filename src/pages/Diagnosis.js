@@ -114,7 +114,7 @@ export default function Diagnosis() {
           <Card className="bg-white border border-slate-300 shadow-sm mb-6">
             <CardHeader>
               <CardTitle className="text-xl font-semibold text-slate-800">
-                {result.predicted_agent}
+                Predicted Agent: <b>{result.predicted_agent}</b>
               </CardTitle>
             </CardHeader>
             <CardContent className="text-slate-600 space-y-2">
