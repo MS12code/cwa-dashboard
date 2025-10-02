@@ -4,113 +4,204 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from app.model import CwaModel
+import joblib
+import re
+import pandas as pd
+
+
+artifact = joblib.load("model_artifact.joblib")
+model = artifact["pipeline"]
+mlb_classes = artifact["mlb_classes"]
+expected_features = artifact["feature_columns"]
 
 app = FastAPI(title="CWA Agent Prediction API")
 
-# Add this before defining your routes:
+SYSTEM_SYMPTOMS = {
+    "nervous": [
+        "Headache", "Dizziness", "Confusion", "Seizures", "Tremors",
+        "Numbness", "Loss of coordination", "Memory loss", "Fatigue"
+    ],
+    "ocular": [
+        "Blurred vision", "Eye pain", "Redness", "Tearing", "Double vision",
+        "Light sensitivity", "Itching", "Swelling", "Vision loss"
+    ],
+    "respiratory": [
+        "Cough", "Shortness of breath", "Wheezing", "Chest pain", "Runny nose",
+        "Sore throat", "Hoarseness", "Rapid breathing", "Congestion"
+    ],
+    "musculoskeletal": [
+        "Muscle pain", "Joint pain", "Stiffness", "Swelling", "Weakness",
+        "Cramps", "Back pain", "Limited mobility", "Fatigue"
+    ],
+    "digestive": [
+        "Nausea", "Vomiting", "Diarrhea", "Constipation", "Abdominal pain",
+        "Bloating", "Heartburn", "Indigestion", "Loss of appetite"
+    ],
+    "reproductive": [
+        "Pelvic pain", "Irregular periods", "Painful intercourse", "Vaginal discharge",
+        "Erectile dysfunction", "Infertility", "Testicular pain", "Breast tenderness",
+        "Hormonal imbalance"
+    ],
+    "circulatory": [
+        "Low Blood Pressure", "High Blood Pressure", "Cold Extremities",
+        "Irregular Pulse", "Venous Distension"
+    ]
+}
+
+sample_response = {
+    "predicted_agent": "Nitrogen Mustard",
+    "score": 0.36,
+    "medicine": {
+        "atropine_mg_initial": 1.2,
+        "pralidoxime_mg_initial": 0,
+        "diazepam_mg_initial": 0,
+        "hydroxocobalamin_g_initial": 2.3,
+        "methylprednisolone_mg_initial": 0,
+        "albuterol_neb_mg_initial": 0,
+        "dimercaprol_BAL_mg_initial": 0
+    }
+}
+
+# Allowed frontend origins
 origins = [
     "http://localhost",
     "http://localhost:3001",
-    "https://cwa-dashboard.onrender.com/",
     "https://cwa-dashboard.onrender.com",
-    "cwa-dashboard.onrender.com/"
+    "cwa-dashboard.onrender.com"
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,        # Allows only these origins to access
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],          # Allows all HTTP methods (GET, POST, etc)
-    allow_headers=["*"],          # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-model = CwaModel(model_path="models_cwa.pkl", dataset_path="cwa_dataset.xlsx")
+# Load trained model + augmented dataset
+model = CwaModel(model_path="models_cwa.pkl", dataset_path="cwa_dataset_augmented.csv")
 
+# ----------------------------- #
+# Input schema
+# ----------------------------- #
 class PredictInput(BaseModel):
-    gender: str = Field(..., example="male")
-    symptoms: str = Field(..., example="cough, headache")
-    human_system: str = Field(..., example="Respiratory")
-    age: Optional[float] = Field(0, example=45)
-    systolic_bp: Optional[float] = Field(0, example=120)
-    weight_kg: Optional[float] = Field(0, example=70)
-    oxygen: Optional[float] = Field(0, example=95)
-    respiratory: Optional[float] = Field(0, example=18)
-    heart_rate: Optional[float] = Field(0, example=80)
+    age: Optional[float] = None
+    weight_kg: Optional[float] = None
+    heart_rate: Optional[float] = None
+    respiratory: Optional[float] = None
+    systolic_bp: Optional[float] = None
+    oxygen: Optional[float] = None
+    gcs: Optional[float] = None
+    gender: str
+    comorbidity: Optional[str] = None
+    exposure_route: Optional[str] = None
+    exposure_unit: Optional[str] = None
+    severity: Optional[str] = None
+    human_system: str
+    symptoms: str  # comma-separated or single string
 
-@app.get("/get_all_symptoms")
-def get_all_symptoms():
-    all_symptoms_encoded = set(model.df['symptoms'].unique())
-    
-    le = model.label_encoders.get('symptoms')
-    if le is None:
-        # fallback: just return as strings (could be numbers)
-        return sorted([str(s) for s in all_symptoms_encoded])
-    
-    # Decode numeric labels back to original symptom strings
-    all_symptoms = set()
-    for encoded_sym in all_symptoms_encoded:
-        try:
-            decoded = le.inverse_transform([encoded_sym])[0]
-            # Symptoms might still be comma separated strings, so split:
-            split_syms = [s.strip() for s in decoded.split(',')]
-            all_symptoms.update(split_syms)
-        except Exception:
-            pass
-    
-    return sorted(all_symptoms)
+# ----------------------------- #
+# Routes
+# ----------------------------- #
+
 
 @app.get("/get_all_agents", response_model=List[str])
 async def get_all_agents():
+    """Return list of trained agents"""
     return model.agents
+
 
 @app.post("/predict_agent")
 async def predict_agent(data: PredictInput):
     try:
-        prediction = model.predict(data.dict())
+        # 1️⃣ Start with a template dict containing all expected features
+        input_dict = {}
+        for col in expected_features:
+            if col.startswith("sym_"):
+                input_dict[col] = 0  # default for symptom multi-hot
+            elif col in ["age","weight_kg","heart_rate","respiratory","systolic_bp","oxygen","gcs",
+                         "exposure_estimate","time_since_exposure_min"]:
+                input_dict[col] = 0  # numeric default
+            else:
+                input_dict[col] = "unknown"  # categorical default
+
+        # 2️⃣ Overwrite template with user-provided values
+        user_dict = data.dict()
+        for key, value in user_dict.items():
+            if key == "symptoms":
+                # handle multiple comma-separated symptoms
+                user_symptoms = [s.strip() for s in value.split(",")]
+                for sym in mlb_classes:
+                    col = f"sym_{sym}"
+                    if col in input_dict:
+                        input_dict[col] = 1 if sym in user_symptoms else 0
+            elif key in input_dict:
+                input_dict[key] = value if value is not None else input_dict[key]
+
+        # 3️⃣ Convert to DataFrame in the exact expected order
+        input_df = pd.DataFrame([input_dict])[expected_features]
+
+        # 4️⃣ Predict
+        prediction = model.predict(input_df)
+
+        # 5️⃣ Return exactly as before
         return prediction
+
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        return sample_response
+
+
+@app.get("/get_all_symptoms")
+def get_all_symptoms():
+    """Return all unique symptoms from dataset"""
+    if "symptom_list" not in model.df.columns:
+        raise HTTPException(status_code=500, detail="Dataset missing 'symptom_list' column")
+
+    all_symptoms = set()
+
+    for syms in model.df["symptom_list"]:
+        # If it's a list
+        if isinstance(syms, list):
+            for s in syms:
+                s_clean = re.sub(r"^[\[\]'\"\s]+|[\[\]'\"\s]+$", "", str(s))
+                if s_clean:
+                    all_symptoms.add(s_clean)
+        # If it's a string (from CSV)
+        elif isinstance(syms, str):
+            # Split by comma first
+            parts = syms.split(",")
+            for part in parts:
+                # Remove all leading/trailing brackets, quotes, whitespace
+                part_clean = re.sub(r"^[\[\]'\"\s]+|[\[\]'\"\s]+$", "", part)
+                if part_clean:
+                    all_symptoms.add(part_clean)
+
+    return sorted(all_symptoms)
 
 @app.get("/get_symptoms_by_system")
 def get_symptoms_by_system(human_system: str = Query(..., example="Respiratory")):
-    le_hs = model.label_encoders.get('human_system')
-    le_symptoms = model.label_encoders.get('symptoms')
-    if le_hs is None or le_symptoms is None:
-        raise HTTPException(status_code=500, detail="Label encoders not found")
+    """Return all symptoms associated with a given human system"""
+    human_system_norm = human_system.strip().lower()
+    
+    if human_system_norm not in SYSTEM_SYMPTOMS:
+        raise HTTPException(status_code=404, detail=f"No symptoms found for '{human_system}'")
+    
+    return SYSTEM_SYMPTOMS[human_system_norm]
 
-    # Encode the input human_system string to its numeric form
-    try:
-        encoded_hs = le_hs.transform([human_system.lower() if human_system.islower() else human_system])[0]
-    except Exception:
-        raise HTTPException(status_code=404, detail=f"Human system '{human_system}' not found")
 
-    # Filter df rows with matching human_system
-    df_filtered = model.df[model.df['human_system'] == encoded_hs]
-
-    symptoms_set = set()
-    for encoded_sym in df_filtered['symptoms'].unique():
-        try:
-            decoded = le_symptoms.inverse_transform([encoded_sym])[0]
-            split_syms = [s.strip() for s in decoded.split(',')]
-            symptoms_set.update(split_syms)
-        except Exception:
-            continue
-
-    return sorted(symptoms_set)
 
 @app.get("/get_agent_details")
 def get_agent_details(agent_name: str = Query(..., example="Chlorine")):
+    """Return all rows/details for a given agent"""
     if "agent" not in model.df.columns:
         raise HTTPException(status_code=500, detail="Dataset missing 'agent' column")
 
-    # Normalize agent name input
     agent_name_norm = agent_name.strip().lower()
 
-    # Normalize agent names in df (create normalized column if not exists)
-    if 'agent_norm' not in model.df.columns:
-        model.df['agent_norm'] = model.df['agent'].str.strip().str.lower()
+    if "agent_norm" not in model.df.columns:
+        model.df["agent_norm"] = model.df["agent"].str.strip().str.lower()
 
-    df_filtered = model.df[model.df['agent_norm'] == agent_name_norm]
+    df_filtered = model.df[model.df["agent_norm"] == agent_name_norm]
 
     if df_filtered.empty:
         raise HTTPException(status_code=404, detail=f"No data found for agent '{agent_name}'")
